@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Heart, Share2 } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Share2, Plus, Minus } from 'lucide-react';
 import { apiService } from '../services/api';
 
-const ProductDetail = () => {
+const ProductDetail = ({ onAddToCart, user }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
     loadProduct();
@@ -49,12 +51,34 @@ const ProductDetail = () => {
     navigate(-1);
   };
 
-  const handleAddToCart = () => {
-    // TODO: Implement add to cart functionality
-    console.log('Adding to cart:', product?.id);
+  const handleAddToCart = async () => {
+    if (!user) {
+      // Show login prompt or redirect to login
+      console.log('User not logged in, redirecting to login...');
+      return;
+    }
+
+    if (product) {
+      setAddingToCart(true);
+      try {
+        await onAddToCart({ ...product, quantity });
+        console.log(`Added ${quantity} ${product.name} to cart`);
+        // Show success message
+        alert(`Added ${quantity} ${product.name} to cart!`);
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+        alert('Failed to add item to cart. Please try again.');
+      } finally {
+        setAddingToCart(false);
+      }
+    }
   };
 
   const handleWishlist = () => {
+    if (!user) {
+      alert('Please login to add items to wishlist');
+      return;
+    }
     // TODO: Implement wishlist functionality
     console.log('Adding to wishlist:', product?.id);
   };
@@ -62,6 +86,12 @@ const ProductDetail = () => {
   const handleShare = () => {
     // TODO: Implement share functionality
     console.log('Sharing product:', product?.id);
+  };
+
+  const handleQuantityChange = (newQuantity) => {
+    if (newQuantity >= 1) {
+      setQuantity(newQuantity);
+    }
   };
 
   if (loading) {
@@ -155,6 +185,11 @@ const ProductDetail = () => {
                 {product.weight || 'N/A'} / {product.packing_unit || 'Unit'}
               </span>
             </div>
+
+            <div className="product-price">
+              <span className="label">Price:</span>
+              <span className="value price">${product.price || 0}</span>
+            </div>
           </div>
 
           <div className="product-description">
@@ -162,10 +197,33 @@ const ProductDetail = () => {
             <p>{product.description || 'No description available for this product.'}</p>
           </div>
 
+          <div className="product-quantity">
+            <span className="label">Quantity:</span>
+            <div className="quantity-controls">
+              <button 
+                onClick={() => handleQuantityChange(quantity - 1)}
+                className="quantity-btn"
+              >
+                <Minus size={16} />
+              </button>
+              <span className="quantity-display">{quantity}</span>
+              <button 
+                onClick={() => handleQuantityChange(quantity + 1)}
+                className="quantity-btn"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          </div>
+
           <div className="product-actions">
-            <button className="action-btn primary" onClick={handleAddToCart}>
+            <button 
+              className="action-btn primary" 
+              onClick={handleAddToCart}
+              disabled={addingToCart}
+            >
               <ShoppingCart size={20} />
-              Add to Cart
+              {addingToCart ? 'Adding...' : 'Add to Cart'}
             </button>
             <button className="action-btn secondary" onClick={handleWishlist}>
               <Heart size={20} />
@@ -176,6 +234,12 @@ const ProductDetail = () => {
               Share
             </button>
           </div>
+
+          {!user && (
+            <div className="login-prompt">
+              <p>Please <button onClick={() => window.location.reload()} className="login-link">login</button> to add items to your cart</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

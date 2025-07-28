@@ -1,9 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, ShoppingCart, User, ChevronDown, Home, ArrowLeft } from 'lucide-react';
+import { Search, ShoppingCart, User, ChevronDown, Home, ArrowLeft, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../services/api';
 
-const Header = ({ searchTerm, onSearch }) => {
+const Header = ({ 
+  searchTerm, 
+  onSearch, 
+  user, 
+  onLoginClick, 
+  onLogout, 
+  cartItemCount, 
+  onCartClick 
+}) => {
   const navigate = useNavigate();
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || '');
   const [searchResults, setSearchResults] = useState([]);
@@ -87,14 +95,29 @@ const Header = ({ searchTerm, onSearch }) => {
           <a href="#" className="nav-link">Catalog</a>
         </div>
         <div className="top-nav-right">
-          <div className="cart-icon">
+          <div className="cart-icon" onClick={onCartClick}>
             <ShoppingCart size={20} />
-            <span className="cart-count">0</span>
+            {cartItemCount > 0 && (
+              <span className="cart-count">{cartItemCount}</span>
+            )}
           </div>
-          <a href="#" className="nav-link">
-            <User size={16} />
-            Login
-          </a>
+          {user ? (
+            <div className="user-menu">
+              <div className="user-info">
+                <User size={16} />
+                <span>{user.name || user.email}</span>
+              </div>
+              <button onClick={onLogout} className="logout-btn">
+                <LogOut size={16} />
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button onClick={onLoginClick} className="nav-link login-btn">
+              <User size={16} />
+              Login
+            </button>
+          )}
         </div>
       </div>
 
