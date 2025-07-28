@@ -1,17 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, ShoppingCart, User, ChevronDown, Home, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { apiService } from '../services/api';
 
 const Header = ({ searchTerm, onSearch }) => {
+  const navigate = useNavigate();
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || '');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     onSearch(localSearchTerm);
+    setShowDropdown(false);
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = async (e) => {
     const value = e.target.value;
     setLocalSearchTerm(value);
+    
+    if (value.trim().length >= 2) {
+      setLoading(true);
+      try {
+        const results = await apiService.searchProducts(value);
+        setSearchResults(results.slice(0, 5)); // Limit to 5 results
+        setShowDropdown(true);
+      } catch (error) {
+        console.error('Error searching products:', error);
+        setSearchResults([]);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setSearchResults([]);
+      setShowDropdown(false);
+    }
+
     // Debounce search for better performance
     if (value.trim() === '') {
       onSearch('');
@@ -20,6 +60,19 @@ const Header = ({ searchTerm, onSearch }) => {
 
   const handleSearchButtonClick = () => {
     onSearch(localSearchTerm);
+    setShowDropdown(false);
+  };
+
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
+    setShowDropdown(false);
+    setLocalSearchTerm('');
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      setShowDropdown(false);
+    }
   };
 
   return (
@@ -59,7 +112,7 @@ const Header = ({ searchTerm, onSearch }) => {
 
         {/* Search and Navigation Bar */}
         <div className="search-nav-section">
-          <div className="search-container">
+          <div className="search-container" ref={searchRef}>
             <form onSubmit={handleSearchSubmit} className="search-bar">
               <input 
                 type="text" 
@@ -67,6 +120,8 @@ const Header = ({ searchTerm, onSearch }) => {
                 className="search-input"
                 value={localSearchTerm}
                 onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+                autoComplete="off"
               />
               <button 
                 type="button" 
@@ -76,6 +131,41 @@ const Header = ({ searchTerm, onSearch }) => {
                 <Search size={20} />
               </button>
             </form>
+            
+            {/* Search Dropdown */}
+            {showDropdown && (
+              <div className="search-dropdown">
+                {loading ? (
+                  <div className="dropdown-loading">
+                    <div className="loading-spinner-small"></div>
+                    <span>Searching...</span>
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div className="dropdown-results">
+                    {searchResults.map((product) => (
+                      <div
+                        key={product.id}
+                        className="dropdown-item"
+                        onClick={() => handleProductClick(product.id)}
+                      >
+                        <div className="dropdown-item-content">
+                          <div className="dropdown-item-name">{product.name}</div>
+                          <div className="dropdown-item-id">#{product.id}</div>
+                        </div>
+                        <div className="dropdown-item-brand">
+                          {product.brand || 'Unknown Brand'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : localSearchTerm.trim().length >= 2 ? (
+                  <div className="dropdown-no-results">
+                    <span>No products found</span>
+                  </div>
+                ) : null}
+              </div>
+            )}
+            
             <div className="search-underline">
               <div className="red-line"></div>
               <div className="green-line"></div>

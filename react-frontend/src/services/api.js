@@ -23,19 +23,17 @@ export const apiService = {
     
     try {
       const response = await fetch(url);
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
+      console.log('Products response status:', response.status);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
-      console.log('Products data:', data);
-      return data;
+      console.log('Products data received:', data);
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('Error fetching products:', error);
-      console.error('Error details:', error.message);
       return [];
     }
   },
@@ -54,11 +52,10 @@ export const apiService = {
       }
       
       const data = await response.json();
-      console.log('Categories data:', data);
-      return data;
+      console.log('Categories data received:', data);
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('Error fetching categories:', error);
-      console.error('Error details:', error.message);
       return [];
     }
   },

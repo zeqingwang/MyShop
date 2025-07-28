@@ -91,16 +91,22 @@ const Sidebar = ({
               <ChevronRight size={16} />
             </div>
             <div className="filter-options">
-              {category.options.map(option => (
-                <label key={option.id} className="filter-option">
-                  <input
-                    type="checkbox"
-                    checked={selectedCategory === option.id}
-                    onChange={() => handleCategorySelect(option.id)}
-                  />
-                  <span>{option.name}</span>
-                </label>
-              ))}
+              {category.options.length > 0 ? (
+                category.options.map(option => (
+                  <label key={option.id} className="filter-option">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategory === option.id}
+                      onChange={() => handleCategorySelect(option.id)}
+                    />
+                    <span>{option.name}</span>
+                  </label>
+                ))
+              ) : (
+                <div className="no-categories">
+                  <p>No categories available</p>
+                </div>
+              )}
             </div>
             {index < filterCategories.length - 1 && <div className="filter-divider"></div>}
           </div>

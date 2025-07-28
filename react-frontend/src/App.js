@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import ProductGrid from './components/ProductGrid';
+import ProductDetail from './components/ProductDetail';
 import { apiService } from './services/api';
 
 function App() {
@@ -12,6 +14,8 @@ function App() {
   const [sortBy, setSortBy] = useState('Recommend');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(8);
   const [filters, setFilters] = useState({
     category: [],
     brand: [],
@@ -39,6 +43,7 @@ function App() {
       
       setProducts(productsData);
       setCategories(categoriesData);
+      setCurrentPage(1); // Reset to first page when data loads
     } catch (error) {
       console.error('Error loading initial data:', error);
     } finally {
@@ -49,6 +54,7 @@ function App() {
   // Handle search
   const handleSearch = async (searchValue) => {
     setSearchTerm(searchValue);
+    setCurrentPage(1); // Reset to first page when searching
     if (searchValue.trim()) {
       try {
         console.log('Searching for:', searchValue);
@@ -67,6 +73,7 @@ function App() {
   // Handle sorting
   const handleSort = async (sortType) => {
     setSortBy(sortType);
+    setCurrentPage(1); // Reset to first page when sorting
     try {
       console.log('Sorting by:', sortType);
       const sortedProducts = await apiService.getProductsSorted(sortType);
@@ -80,6 +87,7 @@ function App() {
   // Handle category filter
   const handleCategoryFilter = async (categoryId) => {
     setSelectedCategory(categoryId);
+    setCurrentPage(1); // Reset to first page when filtering
     try {
       if (categoryId) {
         console.log('Filtering by category:', categoryId);
@@ -105,32 +113,55 @@ function App() {
     setSelectedCategory(null);
     setSearchTerm('');
     setSortBy('Recommend');
+    setCurrentPage(1);
     loadInitialData();
   };
 
+  // Calculate pagination
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(products.length / productsPerPage);
+
+  // Handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
-    <div className="App">
-      <Header 
-        searchTerm={searchTerm}
-        onSearch={handleSearch}
-      />
-      <div className="main-container">
-        <Sidebar 
-          sortBy={sortBy}
-          setSortBy={handleSort}
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onCategoryFilter={handleCategoryFilter}
-          filters={filters}
-          setFilters={setFilters}
-          clearAllFilters={clearAllFilters}
+    <Router>
+      <div className="App">
+        <Header 
+          searchTerm={searchTerm}
+          onSearch={handleSearch}
         />
-        <ProductGrid 
-          products={products}
-          loading={loading}
-        />
+        <Routes>
+          <Route path="/" element={
+            <div className="main-container">
+              <Sidebar 
+                sortBy={sortBy}
+                setSortBy={handleSort}
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategoryFilter={handleCategoryFilter}
+                filters={filters}
+                setFilters={setFilters}
+                clearAllFilters={clearAllFilters}
+              />
+              <ProductGrid 
+                products={currentProducts}
+                loading={loading}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalProducts={products.length}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          } />
+          <Route path="/product/:id" element={<ProductDetail />} />
+        </Routes>
       </div>
-    </div>
+    </Router>
   );
 }
 
