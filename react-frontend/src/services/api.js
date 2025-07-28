@@ -118,7 +118,7 @@ export const apiService = {
 
   async getProductsByCategory(categoryId) {
     try {
-      const url = `${API_BASE_URL}/products.php?category=${categoryId}`;
+      const url = `${API_BASE_URL}/products.php?category_id=${categoryId}`;
       console.log('Fetching products by category from:', url);
       
       const response = await fetch(url);
