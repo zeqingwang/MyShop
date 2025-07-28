@@ -279,23 +279,37 @@ export const apiService = {
     }
   },
 
-  async removeFromCart(cartId) {
+  async removeFromCart(userId, productId, quantity = 1) {
     try {
-      console.log('Removing from cart (localStorage):', cartId);
+      console.log('Removing from cart (database):', { userId, productId, quantity });
       
-      // For now, we'll use localStorage
-      // This is a temporary solution until backend endpoints are ready
-      const userId = JSON.parse(localStorage.getItem('user'))?.id;
-      if (!userId) return false;
+      const response = await fetch(`${API_BASE_URL}/remove_from_cart.php`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          product_id: productId,
+          quantity: quantity
+        })
+      });
       
-      const cartKey = `cart_${userId}`;
-      const existingCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+      console.log('Remove from cart response status:', response.status);
       
-      const updatedCart = existingCart.filter(item => item.product_id !== cartId);
-      localStorage.setItem(cartKey, JSON.stringify(updatedCart));
-      console.log('Item removed from cart in localStorage');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
-      return true;
+      const data = await response.json();
+      console.log('Remove from cart response:', data);
+      
+      if (data.message === 'Product removed from cart' || data.message === 'Quantity updated in cart') {
+        console.log('Product removed/updated in cart successfully');
+        return true;
+      }
+      
+      return false;
     } catch (error) {
       console.error('Error removing from cart:', error);
       return false;

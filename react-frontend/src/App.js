@@ -260,18 +260,16 @@ function App() {
     }
   };
 
-  const removeFromCart = async (cartId) => {
+  const removeFromCart = async (productId) => {
     if (!user) return;
 
     try {
-      console.log('Removing from cart:', cartId);
-      const success = await apiService.removeFromCart(cartId);
+      console.log('Removing from cart:', productId);
+      const success = await apiService.removeFromCart(user.id, productId, 1);
       
       if (success) {
-        // Reload cart items from localStorage after removing
-        const cartKey = `cart_${user.id}`;
-        const updatedCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
-        setCartItems(updatedCart);
+        // Reload cart items from database after removing
+        await loadCartItems(user.id);
         console.log('Product removed from cart successfully');
       } else {
         console.error('Failed to remove product from cart');
