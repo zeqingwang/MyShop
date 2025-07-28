@@ -1,7 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, ShoppingCart, User, ChevronDown, Home, ArrowLeft } from 'lucide-react';
 
-const Header = () => {
+const Header = ({ searchTerm, onSearch }) => {
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm || '');
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    onSearch(localSearchTerm);
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setLocalSearchTerm(value);
+    // Debounce search for better performance
+    if (value.trim() === '') {
+      onSearch('');
+    }
+  };
+
+  const handleSearchButtonClick = () => {
+    onSearch(localSearchTerm);
+  };
+
   return (
     <header className="header">
       {/* Top Navigation Bar */}
@@ -40,17 +60,22 @@ const Header = () => {
         {/* Search and Navigation Bar */}
         <div className="search-nav-section">
           <div className="search-container">
-            <div className="search-bar">
+            <form onSubmit={handleSearchSubmit} className="search-bar">
               <input 
                 type="text" 
                 placeholder="Product & Brand & Item#" 
                 className="search-input"
-                defaultValue="roduct & Brand & Item#"
+                value={localSearchTerm}
+                onChange={handleSearchChange}
               />
-              <button className="search-button">
+              <button 
+                type="button" 
+                className="search-button"
+                onClick={handleSearchButtonClick}
+              >
                 <Search size={20} />
               </button>
-            </div>
+            </form>
             <div className="search-underline">
               <div className="red-line"></div>
               <div className="green-line"></div>

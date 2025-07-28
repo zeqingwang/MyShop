@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 
-const Sidebar = ({ sortBy, setSortBy, filters, setFilters, clearAllFilters }) => {
+const Sidebar = ({ 
+  sortBy, 
+  setSortBy, 
+  categories = [], 
+  selectedCategory,
+  onCategoryFilter,
+  filters, 
+  setFilters, 
+  clearAllFilters 
+}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [hoveredOption, setHoveredOption] = useState(null);
   
   const sortOptions = ['Recommend', 'Name A-Z', 'Name Z-A', 'Category', 'Item No'];
   
   const filterCategories = [
-    { name: 'By Category', key: 'category', options: ['Drink', 'Food', 'Fruit'] },
-   
+    { 
+      name: 'By Category', 
+      key: 'category', 
+      options: categories.map(cat => ({ id: cat.id, name: cat.name }))
+    }
   ];
 
   const handleFilterChange = (filterKey, value) => {
@@ -19,6 +31,16 @@ const Sidebar = ({ sortBy, setSortBy, filters, setFilters, clearAllFilters }) =>
         ? prev[filterKey].filter(item => item !== value)
         : [...prev[filterKey], value]
     }));
+  };
+
+  const handleCategorySelect = (categoryId) => {
+    if (selectedCategory === categoryId) {
+      // If same category clicked, deselect it
+      onCategoryFilter(null);
+    } else {
+      // Select new category
+      onCategoryFilter(categoryId);
+    }
   };
 
   return (
@@ -70,13 +92,13 @@ const Sidebar = ({ sortBy, setSortBy, filters, setFilters, clearAllFilters }) =>
             </div>
             <div className="filter-options">
               {category.options.map(option => (
-                <label key={option} className="filter-option">
+                <label key={option.id} className="filter-option">
                   <input
                     type="checkbox"
-                    checked={filters[category.key].includes(option)}
-                    onChange={() => handleFilterChange(category.key, option)}
+                    checked={selectedCategory === option.id}
+                    onChange={() => handleCategorySelect(option.id)}
                   />
-                  <span>{option}</span>
+                  <span>{option.name}</span>
                 </label>
               ))}
             </div>
