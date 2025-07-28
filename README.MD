@@ -2,6 +2,9 @@
 
 A modern e-commerce platform built with React frontend and PHP backend, featuring product browsing, user authentication, shopping cart functionality, and responsive design.
 
+## 🎥 Demo Video
+Watch the MyShop demo: [MyShop E-commerce Platform Demo](https://www.youtube.com/watch?v=3LiD29OtA_I)
+
 
 ## 🛠️ Tech Stack
 
