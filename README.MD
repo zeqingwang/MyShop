@@ -45,7 +45,8 @@ MyShop/
     │   ├── login.php        # Authentication
     │   ├── signup.php       # User registration
     │   ├── cart.php         # Cart operations
-    │   └── add_to_cart.php  # Add to cart
+    │   ├── add_to_cart.php  # Add to cart
+    │   └── remove_from_cart.php  # Remove from cart
     └── config/
         └── db.php           # Database configuration
 ```
