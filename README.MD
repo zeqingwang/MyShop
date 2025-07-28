@@ -155,33 +155,6 @@ The application requires the following tables:
 - Persistent cart data
 - Total calculation
 
-## 🔒 Security Features
-- Password hashing for user accounts
-- Input validation and sanitization
-- CORS configuration for API security
-- Secure session management
-
-## 📱 Responsive Design
-- Mobile-first approach
-- Flexible grid layouts
-- Touch-friendly interfaces
-- Optimized for all screen sizes
-
-## 🚀 Future Enhancements
-- Payment gateway integration
-- Order management system
-- Admin dashboard
-- Product reviews and ratings
-- Wishlist functionality
-- Email notifications
-
-## 🤝 Contributing
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
 ## 📄 License
 This project is open source and available under the [MIT License](LICENSE).
 
