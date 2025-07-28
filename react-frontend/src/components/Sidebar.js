@@ -14,7 +14,7 @@ const Sidebar = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [hoveredOption, setHoveredOption] = useState(null);
   
-  const sortOptions = ['Recommend', 'Name A-Z', 'Name Z-A', 'Category', 'Item No'];
+  const sortOptions = ['Recommend', 'Name A-Z', 'Name Z-A', 'Item No'];
   
   const filterCategories = [
     { 

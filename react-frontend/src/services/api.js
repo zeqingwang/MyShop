@@ -11,8 +11,8 @@ export const apiService = {
       if (params.sort) {
         queryParams.append('sort', params.sort);
       }
-      if (params.category) {
-        queryParams.append('category', params.category);
+      if (params.category_id) {
+        queryParams.append('category_id', params.category_id);
       }
       if (params.search) {
         queryParams.append('search', params.search);
@@ -91,8 +91,7 @@ export const apiService = {
         'Recommend': 'name_asc',
         'Name A-Z': 'name_asc',
         'Name Z-A': 'name_desc',
-        'Category': 'category_asc',
-        'Item No': 'id_asc'
+        'Item No': 'id'
       };
       
       const sortValue = sortMap[sortType] || 'name_asc';
@@ -134,6 +133,51 @@ export const apiService = {
       return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('Error fetching products by category:', error);
+      return [];
+    }
+  },
+
+  async getProductsWithFilters(filters = {}) {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (filters.category_id) {
+        queryParams.append('category_id', filters.category_id);
+      }
+      if (filters.sort) {
+        // Map frontend sort options to backend sort values
+        const sortMap = {
+          'Recommend': 'name_asc',
+          'Name A-Z': 'name_asc',
+          'Name Z-A': 'name_desc',
+          'Item No': 'id'
+        };
+        const sortValue = sortMap[filters.sort] || 'name_asc';
+        queryParams.append('sort', sortValue);
+      }
+      if (filters.search) {
+        queryParams.append('search', filters.search);
+      }
+      if (filters.id) {
+        queryParams.append('id', filters.id);
+      }
+
+      const url = `${API_BASE_URL}/products.php${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+      console.log('Fetching products with filters from:', url);
+      
+      const response = await fetch(url);
+      console.log('Filtered products response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Filtered products data received:', data);
+      
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching products with filters:', error);
       return [];
     }
   },

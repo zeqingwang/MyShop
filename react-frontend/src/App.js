@@ -142,32 +142,33 @@ function App() {
   const handleSort = async (sortType) => {
     setSortBy(sortType);
     setCurrentPage(1); // Reset to first page when sorting
-    try {
-      console.log('Sorting by:', sortType);
-      const sortedProducts = await apiService.getProductsSorted(sortType);
-      console.log('Sorted products:', sortedProducts);
-      setProducts(sortedProducts);
-    } catch (error) {
-      console.error('Error sorting products:', error);
-    }
+    await loadFilteredAndSortedProducts(sortType, selectedCategory);
   };
 
   // Handle category filter
   const handleCategoryFilter = async (categoryId) => {
     setSelectedCategory(categoryId);
     setCurrentPage(1); // Reset to first page when filtering
+    await loadFilteredAndSortedProducts(sortBy, categoryId);
+  };
+
+  // Combined function to load products with both filtering and sorting
+  const loadFilteredAndSortedProducts = async (sortValue = sortBy, categoryValue = selectedCategory) => {
     try {
-      if (categoryId) {
-        console.log('Filtering by category:', categoryId);
-        const filteredProducts = await apiService.getProductsByCategory(categoryId);
-        console.log('Filtered products:', filteredProducts);
-        setProducts(filteredProducts);
-      } else {
-        // If no category selected, load all products
-        loadInitialData();
-      }
+      console.log('Loading products with filters:', { 
+        category: categoryValue, 
+        sort: sortValue 
+      });
+      
+      const products = await apiService.getProductsWithFilters({
+        category_id: categoryValue,
+        sort: sortValue
+      });
+      
+      console.log('Filtered and sorted products:', products);
+      setProducts(products);
     } catch (error) {
-      console.error('Error filtering by category:', error);
+      console.error('Error loading filtered and sorted products:', error);
     }
   };
 
@@ -182,7 +183,7 @@ function App() {
     setSearchTerm('');
     setSortBy('Recommend');
     setCurrentPage(1);
-    loadInitialData();
+    loadFilteredAndSortedProducts('Recommend', null);
   };
 
   // Calculate pagination
