@@ -1,0 +1,22 @@
+<?php
+require_once '../config/db.php';
+header("Content-Type: application/json");
+
+$user_id = $_GET['user_id'] ?? null;
+
+if (!$user_id) {
+    http_response_code(400);
+    echo json_encode(['error' => 'user_id is required']);
+    exit;
+}
+
+// Join cart with product info
+$stmt = $pdo->prepare("
+    SELECT c.product_id, p.name, p.price, c.quantity, (p.price * c.quantity) AS total
+    FROM carts c
+    JOIN products p ON c.product_id = p.id
+    WHERE c.user_id = ?
+");
+$stmt->execute([$user_id]);
+echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+?>
