@@ -40,7 +40,7 @@ const CartModal = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem,
             <>
               <div className="cart-items">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="cart-item">
+                  <div key={item.product_id || item.id} className="cart-item">
                     <div className="cart-item-image">
                       <img 
                         src={item.image_url || `https://via.placeholder.com/60x60/FFFFFF/000000?text=${encodeURIComponent(item.name)}`} 
@@ -50,20 +50,20 @@ const CartModal = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem,
                     
                     <div className="cart-item-details">
                       <h4 className="cart-item-name">{item.name}</h4>
-                      <p className="cart-item-id">#{item.product_id}</p>
+                      <p className="cart-item-id">#{item.product_id || item.id}</p>
                       <p className="cart-item-price">${item.price || 0}</p>
                     </div>
 
                     <div className="cart-item-quantity">
                       <button 
-                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                        onClick={() => handleQuantityChange(item.product_id || item.id, item.quantity - 1)}
                         className="quantity-btn"
                       >
                         <Minus size={14} />
                       </button>
                       <span className="quantity-display">{item.quantity}</span>
                       <button 
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        onClick={() => handleQuantityChange(item.product_id || item.id, item.quantity + 1)}
                         className="quantity-btn"
                       >
                         <Plus size={14} />
@@ -75,7 +75,7 @@ const CartModal = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem,
                     </div>
 
                     <button 
-                      onClick={() => onRemoveItem(item.id)}
+                      onClick={() => onRemoveItem(item.product_id || item.id)}
                       className="remove-btn"
                     >
                       <Trash2 size={16} />

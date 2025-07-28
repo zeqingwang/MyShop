@@ -93,12 +93,27 @@ function App() {
       setCartLoading(true);
       console.log('Loading cart items for user:', userId);
       
+      // Try to get cart items from backend first
       const cartData = await apiService.getCartItems(userId);
-      console.log('Cart items loaded:', cartData);
+      console.log('Cart items from backend:', cartData);
       
-      setCartItems(cartData);
+      if (cartData.length > 0) {
+        // Use backend data if available
+        setCartItems(cartData);
+      } else {
+        // Fallback to localStorage if backend has no items
+        const cartKey = `cart_${userId}`;
+        const localStorageCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+        console.log('Cart items from localStorage:', localStorageCart);
+        setCartItems(localStorageCart);
+      }
     } catch (error) {
-      console.error('Error loading cart items:', error);
+      console.error('Error loading cart items from backend, using localStorage:', error);
+      // Fallback to localStorage if backend fails
+      const cartKey = `cart_${userId}`;
+      const localStorageCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+      console.log('Cart items from localStorage (fallback):', localStorageCart);
+      setCartItems(localStorageCart);
     } finally {
       setCartLoading(false);
     }
@@ -217,20 +232,9 @@ function App() {
       setShowLoginModal(true);
       return;
     }
-
-    try {
-      console.log('Adding to cart:', { product, user: user.id });
-      const success = await apiService.addToCart(user.id, product.id, product.quantity || 1);
-      
-      if (success) {
-        // Reload cart items from database
-        await loadCartItems(user.id);
-        console.log('Product added to cart successfully');
-      } else {
-        console.error('Failed to add product to cart');
-      }
-    } catch (error) {
-      console.error('Error adding to cart:', error);
+    const success = await apiService.addToCart(user.id, product.id, product.quantity || 1);
+    if (success) {
+      await loadCartItems(user.id); // Refresh cart from DB
     }
   };
 
@@ -242,8 +246,10 @@ function App() {
       const success = await apiService.updateCartQuantity(cartId, newQuantity);
       
       if (success) {
-        // Reload cart items from database
-        await loadCartItems(user.id);
+        // Reload cart items from localStorage after updating
+        const cartKey = `cart_${user.id}`;
+        const updatedCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+        setCartItems(updatedCart);
         console.log('Cart quantity updated successfully');
       } else {
         console.error('Failed to update cart quantity');
@@ -261,8 +267,10 @@ function App() {
       const success = await apiService.removeFromCart(cartId);
       
       if (success) {
-        // Reload cart items from database
-        await loadCartItems(user.id);
+        // Reload cart items from localStorage after removing
+        const cartKey = `cart_${user.id}`;
+        const updatedCart = JSON.parse(localStorage.getItem(cartKey) || '[]');
+        setCartItems(updatedCart);
         console.log('Product removed from cart successfully');
       } else {
         console.error('Failed to remove product from cart');
